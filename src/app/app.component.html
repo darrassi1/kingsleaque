@@ -11,7 +11,7 @@
   <!-- Toggle Button -->
   <button class="menu-toggle" (click)="toggleMenu()">☰</button>
   <!-- Navigation Menu -->
-  <nav class="nav-container" [class.show]="menuVisible">
+  <nav class="nav-container"  [class.show]="menuVisible">
     <a class="nav-link" (click)="updateState({ showContent: true, showLoginForm: false })" [class.active]="state.showContent">
       <i class="fas fa-home"></i> Home
     </a>

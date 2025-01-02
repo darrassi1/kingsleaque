@@ -6,13 +6,16 @@
   padding: 0;
   box-sizing: border-box;
 }
+
 /* Default (Large Screen) Styling */
 .menu-toggle {
   display: none; /* Hide toggle button on larger screens */
 }
+
 body {
   font-family: Arial, sans-serif;
 }
+
 html, body {
   height: 100%;
   margin: 0;
@@ -52,7 +55,7 @@ html, body {
   justify-content: space-between;
   align-items: center;
   position: relative;
-  flex-wrap: wrap; /* Added flex wrap for better mobile layout */
+  flex-wrap: wrap;
 }
 
 .logo-container {
@@ -73,16 +76,31 @@ html, body {
   background: linear-gradient(to right, #ffeb3b, #f06292);
   -webkit-background-clip: text;
   color: transparent;
-  margin: 0; /* Remove any extra margin */
+  margin: 0;
 }
 
 .nav-container {
   display: flex;
   gap: 1.5rem;
+  background-color: #858585;
+  border-style: solid;
+  border-color: white;
+  border-radius: 10px;
   justify-content: center;
-  align-items: center; /* Align items vertically */
+  align-items: center;
 }
-
+/* Light Mode - Default Background Color */
+.app-container:not(.dark) .nav-container {
+  background-color: #535353; /* Light background color */
+  border-color: #ffffff; /* Light border */
+  color: #333; /* Dark text color */
+}
+/* Dark Mode - Background and Border Color Adjustments */
+.app-container.dark .nav-container {
+  background-color: #333; /* Dark background color */
+  border-color: #444; /* Darker border */
+  color: #e0e0e0; /* Light text color */
+}
 .nav-link {
   color: white;
   text-decoration: none;
@@ -147,23 +165,23 @@ html, body {
 
 /* For dark mode, ensure proper text contrast */
 .app-container.dark .login-card {
-  background-color: #333; /* Dark background */
-  color: #fff; /* Light text */
+  background-color: #333;
+  color: #fff;
 }
 
 .app-container.dark .login-card input {
-  background-color: #555; /* Darker input fields */
-  color: #fff; /* Light text inside inputs */
-  border: 1px solid #777; /* Lighter border for inputs */
+  background-color: #555;
+  color: #fff;
+  border: 1px solid #777;
 }
 
 .app-container.dark .login-card button {
-  background: linear-gradient(to right, #673ab7, #3f51b5); /* Purple button for dark mode */
+  background: linear-gradient(to right, #673ab7, #3f51b5);
   color: white;
 }
 
 .app-container.dark .login-card .error-message {
-  color: #f44336; /* Error message in red */
+  color: #f44336;
 }
 
 .app-container.dark .login-container {
@@ -180,12 +198,12 @@ html, body {
 }
 
 .app-container:not(.dark) .nav-link {
-  color: #000;
+  color: #ffffff /* Default text color in light mode */
 }
 
 .app-container:not(.dark) .nav-link.active,
 .app-container:not(.dark) .nav-link:hover {
-  color: #ffeb3b;
+  color: #ffeb3b; /* Highlight color on hover and when active */
 }
 
 .app-container:not(.dark) .mode-toggle {
@@ -365,7 +383,6 @@ footer {
 
 /* Mobile Specific Styling */
 @media (max-width: 768px) {
-  /* Menu Toggle Button */
   .menu-toggle {
     display: flex; /* Show toggle button on smaller screens */
     justify-content: center;
@@ -378,7 +395,7 @@ footer {
     font-size: 1.5rem;
     cursor: pointer;
     transition: background 0.3s ease, color 0.3s ease;
-    width: auto; /* Adjust width to content */
+    width: auto;
   }
 
   .menu-toggle:hover {
@@ -386,39 +403,37 @@ footer {
   }
 
   .nav-container {
-    display: none; /* Hide navigation menu initially */
+    display: none;
     flex-direction: column;
     gap: 0.5rem;
     width: 100%;
-    background-color: rgba(0, 0, 0, 0.8); /* Dark background for menu */
+    background-color: rgba(0, 0, 0, 0.8);
     padding: 1rem;
     border-radius: 0.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
   }
 
   .nav-container.show {
-    display: flex; /* Show navigation menu when toggle is active */
+    display: flex;
   }
 
   .nav-link {
     font-size: 1rem;
     text-align: left;
-    color: white; /* Default text color */
+    color: white;
   }
 
-  /* Dark Mode Specific Styling */
   .app-container.dark .menu-toggle {
-    background: linear-gradient(to right, #1e1e1e, #303030); /* Header gradient for dark mode */
-    color: #e0e0e0; /* Light text for contrast */
+    background: linear-gradient(to right, #1e1e1e, #303030);
+    color: #e0e0e0;
   }
 
   .app-container.dark .menu-toggle:hover {
-    background: linear-gradient(to right, #444, #555); /* Slightly lighter gradient for hover */
+    background: linear-gradient(to right, #444, #555);
   }
 
-  /* Admin Button Adjustment */
   .nav-link.nav-admin {
-    background: linear-gradient(to right, #4a148c, #1a237e); /* Header gradient for better visibility */
+    background: linear-gradient(to right, #4a148c, #1a237e);
     color: white;
     padding: 0.5rem 1rem;
     border-radius: 0.5rem;
@@ -429,36 +444,41 @@ footer {
 
   .nav-link.nav-admin:hover {
     background: linear-gradient(to right, #673ab7, #3f51b5);
-    color: #ffeb3b; /* Highlight on hover */
+    color: #ffeb3b;
   }
 
   .app-container.dark .nav-link.nav-admin {
-    background: linear-gradient(to right, #1e1e1e, #303030); /* Header gradient for dark mode */
-    color: #e0e0e0; /* Light text for better visibility */
+    background: linear-gradient(to right, #1e1e1e, #303030);
+    color: #e0e0e0;
   }
 
   .app-container.dark .nav-link.nav-admin:hover {
     background: linear-gradient(to right, #444, #555);
-    color: #ffeb3b; /* Highlight on hover */
+    color: #ffeb3b;
   }
 }
 
-/* Small Screen Fixes for Toggle Icon and Navigation */
+/* Small Screen Fixes */
 @media (max-width: 480px) {
   .logo-container {
-    gap: 0.5rem;
+    gap: 1rem;
+  }
+
+  .menu-toggle {
+    padding-right: 0;
+    justify-content: center;
+    align-items: center;
   }
 
   .title {
-    font-size: 1.5rem; /* Adjust for very small screens */
+    font-size: 1.5rem;
   }
 
   .nav-container {
-    gap: 0.5rem; /* Reduce gap between nav links */
+    gap: 0.5rem;
   }
 
   .nav-link {
-    font-size: 0.9rem; /* Adjust font size for very small screens */
+    font-size: 0.9rem;
   }
 }
-
