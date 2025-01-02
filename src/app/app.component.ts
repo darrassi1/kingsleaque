@@ -62,6 +62,10 @@ toggleMenu() {
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {this.updateSafeVideoUrl();}
+    redirectToHome() {
+    this.state.showContent = true;
+    this.state.showLoginForm = false;
+  }
   updateSafeVideoUrl() {
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoUrl);
   }
