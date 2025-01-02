@@ -6,7 +6,10 @@
   padding: 0;
   box-sizing: border-box;
 }
-
+/* Default (Large Screen) Styling */
+.menu-toggle {
+  display: none; /* Hide toggle button on larger screens */
+}
 body {
   font-family: Arial, sans-serif;
 }
@@ -362,39 +365,81 @@ footer {
 
 /* Mobile Specific Styling */
 @media (max-width: 768px) {
-  .header {
-    flex-direction: column; /* Stack elements vertically */
-    padding: 0.5rem; /* Reduced padding for mobile */
-    align-items: flex-start; /* Align items to the left for better space usage */
-  }
-
-  .logo-container {
+  /* Menu Toggle Button */
+  .menu-toggle {
+    display: flex; /* Show toggle button on smaller screens */
     justify-content: center;
-    margin-bottom: 0.5rem;
+    align-items: center;
+    background: linear-gradient(to right, #4a148c, #1a237e); /* Header gradient for light mode */
+    color: white;
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: background 0.3s ease, color 0.3s ease;
+    width: auto; /* Adjust width to content */
   }
 
-  .title {
-    font-size: 1.8rem; /* Slightly smaller font size on mobile */
-    text-align: center;
-    margin-bottom: 0.5rem;
+  .menu-toggle:hover {
+    background: linear-gradient(to right, #673ab7, #3f51b5);
   }
 
   .nav-container {
-    flex-direction: row; /* Stack nav links vertically */
+    display: none; /* Hide navigation menu initially */
+    flex-direction: column;
     gap: 0.5rem;
-    justify-content: flex-start;
-    align-items: flex-start;
-    width: 10%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.8); /* Dark background for menu */
+    padding: 1rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+  }
+
+  .nav-container.show {
+    display: flex; /* Show navigation menu when toggle is active */
   }
 
   .nav-link {
-    font-size: 1.2rem;
-    text-align: center;
+    font-size: 1rem;
+    text-align: left;
+    color: white; /* Default text color */
   }
 
-  .mode-toggle {
-    align-self: center;
-    margin-top: 1rem; /* Space below the button */
+  /* Dark Mode Specific Styling */
+  .app-container.dark .menu-toggle {
+    background: linear-gradient(to right, #1e1e1e, #303030); /* Header gradient for dark mode */
+    color: #e0e0e0; /* Light text for contrast */
+  }
+
+  .app-container.dark .menu-toggle:hover {
+    background: linear-gradient(to right, #444, #555); /* Slightly lighter gradient for hover */
+  }
+
+  /* Admin Button Adjustment */
+  .nav-link.nav-admin {
+    background: linear-gradient(to right, #4a148c, #1a237e); /* Header gradient for better visibility */
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: bold;
+    text-align: center;
+    transition: background 0.3s ease, color 0.3s ease;
+  }
+
+  .nav-link.nav-admin:hover {
+    background: linear-gradient(to right, #673ab7, #3f51b5);
+    color: #ffeb3b; /* Highlight on hover */
+  }
+
+  .app-container.dark .nav-link.nav-admin {
+    background: linear-gradient(to right, #1e1e1e, #303030); /* Header gradient for dark mode */
+    color: #e0e0e0; /* Light text for better visibility */
+  }
+
+  .app-container.dark .nav-link.nav-admin:hover {
+    background: linear-gradient(to right, #444, #555);
+    color: #ffeb3b; /* Highlight on hover */
   }
 }
 
@@ -413,6 +458,6 @@ footer {
   }
 
   .nav-link {
-    font-size: 1rem; /* Adjust font size for very small screens */
+    font-size: 0.9rem; /* Adjust font size for very small screens */
   }
 }

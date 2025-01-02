@@ -4,37 +4,26 @@
 <div class="app-container" [class.dark]="state.isDarkMode">
   <canvas #canvas class="background-canvas"></canvas>
   <header class="header">
-    <div class="logo-container">
-      <img src="assets/logo.png" alt="Kingsleague Logo" class="logo" />
-      <h1 class="title">Kingsleague World Cup</h1>
-    </div>
-    <nav class="nav-container">
-      <a
-        class="nav-link"
-        (click)="updateState({ showContent: true, showLoginForm: false })"
-        [class.active]="state.showContent"
-      >
-        <i class="fas fa-home"></i> Home
-      </a>
-      <a
-        class="nav-link"
-        (click)="updateState({ showContent: false, showLoginForm: true })"
-        [class.active]="state.showLoginForm"
-      >
-        <i class="fas fa-user-shield"></i> Admin
-      </a>
+  <div class="logo-container">
+    <img src="assets/logo.png" alt="Kingsleague Logo" class="logo" />
+    <h1 class="title">Kingsleague World Cup</h1>
+  </div>
+  <!-- Toggle Button -->
+  <button class="menu-toggle" (click)="toggleMenu()">☰ Menu</button>
+  <!-- Navigation Menu -->
+  <nav class="nav-container" [class.show]="menuVisible">
+    <a class="nav-link" (click)="updateState({ showContent: true, showLoginForm: false })" [class.active]="state.showContent">
+      <i class="fas fa-home"></i> Home
+    </a>
+    <a class="nav-link" (click)="updateState({ showContent: false, showLoginForm: true })" [class.active]="state.showLoginForm">
+      <i class="fas fa-user-shield"></i> Admin
+    </a>
+    <button (click)="toggleDarkMode()" class="mode-toggle" [attr.aria-label]="state.isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'">
+      <i [class]="state.isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
+    </button>
+  </nav>
+</header>
 
-      <button
-        (click)="toggleDarkMode()"
-        class="mode-toggle"
-        [attr.aria-label]="
-          state.isDarkMode ? 'Switch to Light Mode' : 'Switch to Dark Mode'
-        "
-      >
-        <i [class]="state.isDarkMode ? 'fas fa-sun' : 'fas fa-moon'"></i>
-      </button>
-    </nav>
-  </header>
 
   <main class="main-content">
     <div class="content-container" *ngIf="state.showContent">

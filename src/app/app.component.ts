@@ -32,6 +32,11 @@ export class AppComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
   safeVideoUrl!: SafeResourceUrl;
   videoUrl: string = 'https://www.youtube.com/embed/J1tTti-xMgs';
+menuVisible = false;
+
+toggleMenu() {
+  this.menuVisible = !this.menuVisible;
+}
 
   private ctx!: CanvasRenderingContext2D;
   private animationElements: AnimationElement[] = [];
