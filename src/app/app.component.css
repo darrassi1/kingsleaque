@@ -1,3 +1,32 @@
+/* Global Styles */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+/* Global Styles */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.app-container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  transition: background 0.3s ease, color 0.3s ease;
+}
+/* Main content should grow to fill available space */
+.main-content {
+  flex-grow: 1;
+}
+/* Background Canvas */
 .background-canvas {
   position: fixed;
   top: 0;
@@ -7,23 +36,31 @@
   z-index: -1;
   transition: all 0.3s ease;
 }
+
+/* Header Styles */
 .header {
   background: linear-gradient(to right, #4a148c, #1a237e);
   color: white;
   padding: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   backdrop-filter: blur(10px);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
+
 .logo-container {
   display: flex;
   align-items: center;
   gap: 1rem;
 }
+
 .logo {
   width: 4rem;
   height: 4rem;
   animation: spin 20s linear infinite;
 }
+
 .title {
   font-size: 2rem;
   font-weight: bold;
@@ -31,21 +68,28 @@
   -webkit-background-clip: text;
   color: transparent;
 }
+
 .nav-container {
   display: flex;
-  gap: 1rem;
+  gap: 1.5rem;
   justify-content: center;
+  align-items: center; /* Align items vertically */
 }
+
+
 .nav-link {
   color: white;
   text-decoration: none;
   font-size: 1rem;
   transition: color 0.3s ease;
 }
+
 .nav-link.active,
 .nav-link:hover {
   color: #ffeb3b;
 }
+
+/* Dark Mode Button */
 .mode-toggle {
   background: none;
   border: none;
@@ -53,10 +97,124 @@
   font-size: 1.5rem;
   cursor: pointer;
   transition: color 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  z-index: 2;
 }
+
 .mode-toggle:hover {
   color: #ffeb3b;
 }
+
+/* Dark Mode and Light Mode Adjustments */
+.app-container.dark {
+  background-color: #121212;
+  color: #e0e0e0;
+}
+
+.app-container.dark .header {
+  background: linear-gradient(to right, #1e1e1e, #303030);
+}
+
+.app-container.dark .nav-link {
+  color: #ffffff;
+}
+
+.app-container.dark .nav-link.active,
+.app-container.dark .nav-link:hover {
+  color: #ffeb3b;
+}
+
+.app-container.dark .mode-toggle {
+  color: white;
+}
+
+.app-container.dark .donate-btn {
+  background: linear-gradient(to right, #4a148c, #1a237e);
+}
+
+.app-container.dark footer {
+  background: linear-gradient(to right, #212121, #000000);
+}
+/* For dark mode, ensure proper text contrast */
+.app-container.dark .login-card {
+  background-color: #333; /* Dark background */
+  color: #fff; /* Light text */
+}
+
+.app-container.dark .login-card input {
+  background-color: #555; /* Darker input fields */
+  color: #fff; /* Light text inside inputs */
+  border: 1px solid #777; /* Lighter border for inputs */
+}
+
+.app-container.dark .login-card button {
+  background: linear-gradient(to right, #673ab7, #3f51b5); /* Purple button for dark mode */
+  color: white;
+}
+
+.app-container.dark .login-card .error-message {
+  color: #f44336; /* Error message in red */
+}
+
+.app-container.dark .login-container {
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.app-container:not(.dark) {
+  background-color: #ffffff;
+  color: #333;
+}
+
+.app-container:not(.dark) .header {
+  background: linear-gradient(to right, #4a148c, #1a237e);
+}
+
+.app-container:not(.dark) .nav-link {
+  color: #000;
+}
+
+.app-container:not(.dark) .nav-link.active,
+.app-container:not(.dark) .nav-link:hover {
+  color: #ffeb3b;
+}
+
+.app-container:not(.dark) .mode-toggle {
+  color: white;
+}
+
+.app-container:not(.dark) .donate-btn {
+  background: linear-gradient(to right, #f06292, #4a148c);
+}
+
+.app-container:not(.dark) footer {
+  background: linear-gradient(to right, #212121, #000000);
+}
+
+.app-container:not(.dark) .login-container {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* Button Hover Effects */
+.donate-btn {
+  margin-top: 1rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(to right, #f06292, #4a148c);
+  color: white;
+  border: none;
+  border-radius: 2rem;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.donate-btn:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Video Container Styling */
 .video-container {
   position: relative;
   display: flex;
@@ -69,25 +227,14 @@
   border-radius: 1rem;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
 iframe {
   width: 80%;
   height: 100%;
   border: none;
 }
-.donate-btn {
-  margin-top: 1rem;
-  padding: 0.75rem 1.5rem;
-  background: linear-gradient(to right, #f06292, #4a148c);
-  color: white;
-  border: none;
-  border-radius: 2rem;
-  cursor: pointer;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.donate-btn:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-}
+
+/* Login Form Styles */
 .login-container {
   background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(10px);
@@ -99,6 +246,7 @@ iframe {
   align-items: center;
   min-height: 400px;
 }
+
 .login-card {
   max-width: 400px;
   width: 100%;
@@ -107,18 +255,22 @@ iframe {
   border-radius: 1rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
 }
+
 .login-card h2 {
   margin-bottom: 1.5rem;
   text-align: center;
 }
+
 .login-card .form-group {
   margin-bottom: 1rem;
 }
+
 .login-card .form-group label {
   display: block;
   margin-bottom: 0.5rem;
   font-weight: bold;
 }
+
 .login-card .form-group input {
   width: 100%;
   padding: 0.5rem;
@@ -126,6 +278,7 @@ iframe {
   border-radius: 0.5rem;
   font-size: 1rem;
 }
+
 .login-card button {
   width: 100%;
   padding: 0.75rem;
@@ -137,15 +290,19 @@ iframe {
   cursor: pointer;
   transition: background 0.3s ease;
 }
+
 .login-card button:hover {
   background: linear-gradient(to right, #673ab7, #3f51b5);
 }
+
 .login-card .error-message {
   color: #d32f2f;
   font-size: 0.9rem;
   margin-top: 1rem;
   text-align: center;
 }
+
+/* Footer Styles */
 footer {
   background: linear-gradient(to right, #212121, #000000);
   color: white;
@@ -153,14 +310,8 @@ footer {
   padding: 1rem;
   margin-top: 2rem;
 }
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+
+/* Admin Controls */
 .admin-controls {
   margin-top: 1rem;
   display: flex;
@@ -193,4 +344,14 @@ footer {
 
 .admin-controls button:hover {
   background: linear-gradient(to right, #673ab7, #3f51b5);
+}
+
+/* Keyframe Animations */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }

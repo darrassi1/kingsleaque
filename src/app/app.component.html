@@ -1,3 +1,6 @@
+<!-- app.component.html -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
 <div class="app-container" [class.dark]="state.isDarkMode">
   <canvas #canvas class="background-canvas"></canvas>
   <header class="header">
@@ -32,13 +35,14 @@
       </button>
     </nav>
   </header>
+
   <main class="main-content">
-    <!-- Content Section -->
     <div class="content-container" *ngIf="state.showContent">
       <div class="video-section">
-<div class="video-container">
-  <iframe [src]="safeVideoUrl" frameborder="0" allowfullscreen></iframe>
-</div>
+        <div class="video-container">
+          <iframe [src]="safeVideoUrl" frameborder="0" allowfullscreen></iframe>
+        </div>
+
         <button
           class="donate-btn"
           (click)="handleDonation()"
@@ -47,65 +51,64 @@
           <i class="fas fa-coffee"></i>
           {{ state.isLoading ? 'Processing...' : 'Buy Me a Coffee' }}
         </button>
-            <!-- Admin Controls -->
-    <div *ngIf="state.isLoggedIn" class="admin-controls">
-      <label for="videoUrlInput">Update Video URL:</label>
-      <input
-        type="text"
-        id="videoUrlInput"
-        [(ngModel)]="videoUrl"
-        placeholder="Enter new video URL"
-      />
-      <button (click)="updateVideoUrl()">Update</button>
-    </div>
+
+        <!-- Admin Controls -->
+        <div *ngIf="state.isLoggedIn" class="admin-controls">
+          <label for="videoUrlInput">Update Video URL:</label>
+          <input
+            type="text"
+            id="videoUrlInput"
+            [(ngModel)]="videoUrl"
+            placeholder="Enter new video URL"
+          />
+          <button (click)="updateVideoUrl()">Update</button>
+        </div>
       </div>
     </div>
 
-
-
-<!-- Login Section -->
-<div class="login-container" *ngIf="state.showLoginForm && !state.isLoggedIn">
-  <div class="login-card">
-    <h2>Admin Login</h2>
-    <form (ngSubmit)="login()" #loginForm="ngForm">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <input
-          type="text"
-          id="username"
-          [(ngModel)]="username"
-          name="username"
-          required
-          #usernameInput="ngModel"
-          [class.error]="usernameInput.invalid && usernameInput.touched"
-          placeholder="Enter username"
-        />
+    <!-- Login Section -->
+    <div class="login-container" *ngIf="state.showLoginForm && !state.isLoggedIn">
+      <div class="login-card">
+        <h2>Admin Login</h2>
+        <form (ngSubmit)="login()" #loginForm="ngForm">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input
+              type="text"
+              id="username"
+              [(ngModel)]="username"
+              name="username"
+              required
+              #usernameInput="ngModel"
+              [class.error]="usernameInput.invalid && usernameInput.touched"
+              placeholder="Enter username"
+            />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              type="password"
+              id="password"
+              [(ngModel)]="password"
+              name="password"
+              required
+              #passwordInput="ngModel"
+              [class.error]="passwordInput.invalid && passwordInput.touched"
+              placeholder="Enter password"
+            />
+          </div>
+          <button type="submit" [disabled]="state.isLoading">
+            Login
+          </button>
+        </form>
+        <p *ngIf="state.errorMessage" class="error-message">
+          {{ state.errorMessage }}
+        </p>
       </div>
-      <div class="form-group">
-        <label for="password">Password</label>
-        <input
-          type="password"
-          id="password"
-          [(ngModel)]="password"
-          name="password"
-          required
-          #passwordInput="ngModel"
-          [class.error]="passwordInput.invalid && passwordInput.touched"
-          placeholder="Enter password"
-        />
-      </div>
-      <button type="submit" [disabled]="state.isLoading">
-        Login
-      </button>
-    </form>
-    <p *ngIf="state.errorMessage" class="error-message">
-      {{ state.errorMessage }}
-    </p>
-  </div>
-</div>
-
+    </div>
   </main>
+
+  <footer>
+    <p>&copy; 2025 Kingsleague World Cup. All rights reserved.</p>
+  </footer>
 </div>
-<footer>
-  <p>&copy; 2025 Kingsleague World Cup. All rights reserved.</p>
-</footer>
