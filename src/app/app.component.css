@@ -10,7 +10,6 @@
 body {
   font-family: Arial, sans-serif;
 }
-/* Global Styles */
 html, body {
   height: 100%;
   margin: 0;
@@ -22,10 +21,12 @@ html, body {
   min-height: 100vh;
   transition: background 0.3s ease, color 0.3s ease;
 }
+
 /* Main content should grow to fill available space */
 .main-content {
   flex-grow: 1;
 }
+
 /* Background Canvas */
 .background-canvas {
   position: fixed;
@@ -47,6 +48,8 @@ html, body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: relative;
+  flex-wrap: wrap; /* Added flex wrap for better mobile layout */
 }
 
 .logo-container {
@@ -67,6 +70,7 @@ html, body {
   background: linear-gradient(to right, #ffeb3b, #f06292);
   -webkit-background-clip: text;
   color: transparent;
+  margin: 0; /* Remove any extra margin */
 }
 
 .nav-container {
@@ -75,7 +79,6 @@ html, body {
   justify-content: center;
   align-items: center; /* Align items vertically */
 }
-
 
 .nav-link {
   color: white;
@@ -138,6 +141,7 @@ html, body {
 .app-container.dark footer {
   background: linear-gradient(to right, #212121, #000000);
 }
+
 /* For dark mode, ensure proper text contrast */
 .app-container.dark .login-card {
   background-color: #333; /* Dark background */
@@ -353,5 +357,62 @@ footer {
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+/* Mobile Specific Styling */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: column; /* Stack elements vertically */
+    padding: 0.5rem; /* Reduced padding for mobile */
+    align-items: flex-start; /* Align items to the left for better space usage */
+  }
+
+  .logo-container {
+    justify-content: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .title {
+    font-size: 1.8rem; /* Slightly smaller font size on mobile */
+    text-align: center;
+    margin-bottom: 0.5rem;
+  }
+
+  .nav-container {
+    flex-direction: row; /* Stack nav links vertically */
+    gap: 0.5rem;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 10%;
+  }
+
+  .nav-link {
+    font-size: 1.2rem;
+    text-align: center;
+  }
+
+  .mode-toggle {
+    align-self: center;
+    margin-top: 1rem; /* Space below the button */
+  }
+}
+
+/* Small Screen Fixes for Toggle Icon and Navigation */
+@media (max-width: 480px) {
+  .logo-container {
+    gap: 0.5rem;
+  }
+
+  .title {
+    font-size: 1.5rem; /* Adjust for very small screens */
+  }
+
+  .nav-container {
+    gap: 0.5rem; /* Reduce gap between nav links */
+  }
+
+  .nav-link {
+    font-size: 1rem; /* Adjust font size for very small screens */
   }
 }
