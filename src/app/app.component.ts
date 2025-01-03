@@ -1,8 +1,6 @@
 import { Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { loadStripe } from '@stripe/stripe-js';
-import { fromEvent } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
 
 interface AnimationElement {
   x: number;
@@ -13,7 +11,6 @@ interface AnimationElement {
   opacity?: number;
   velocity?: { x: number; y: number };
 }
-
 interface AppState {
   isDarkMode: boolean;
   isLoggedIn: boolean;
@@ -22,7 +19,6 @@ interface AppState {
   showLoginForm: boolean;
   errorMessage: string;
 }
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -33,17 +29,14 @@ export class AppComponent implements OnInit {
   safeVideoUrl!: SafeResourceUrl;
   videoUrl: string = 'https://www.youtube.com/embed/J1tTti-xMgs';
 menuVisible = false;
-
 toggleMenu() {
   this.menuVisible = !this.menuVisible;
 }
-
   private ctx!: CanvasRenderingContext2D;
   private animationElements: AnimationElement[] = [];
   private lastTime = 0;
   private readonly frameTime = 1000 / 60; // 60 FPS
   private stripe = loadStripe('your-stripe-publishable-key-here');
-
   state: AppState = {
     isDarkMode: false,
     isLoggedIn: false,
@@ -52,11 +45,8 @@ toggleMenu() {
     showLoginForm: false,
     errorMessage: '',
   };
-
   username = '';
   password = '';
-
-
   constructor(
     private sanitizer: DomSanitizer,
     private ngZone: NgZone,
@@ -73,19 +63,14 @@ toggleMenu() {
     this.updateSafeVideoUrl();
     console.log('Video URL updated to:', this.videoUrl);
   }
-
   ngOnInit() {
     this.loadSavedTheme();
-
-
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoUrl);
   }
-
   updateState(newState: Partial<AppState>) {
     this.state = { ...this.state, ...newState };
     this.cdr.markForCheck();
   }
-
   async login() {
     this.updateState({ isLoading: true });
     setTimeout(() => {
@@ -104,7 +89,6 @@ toggleMenu() {
       }
     }, 1000);
   }
-
   async handleDonation() {
     this.updateState({ isLoading: true });
     try {
@@ -126,21 +110,16 @@ toggleMenu() {
       });
     }
   }
-
   toggleDarkMode() {
     this.updateState({ isDarkMode: !this.state.isDarkMode });
     localStorage.setItem('darkMode', String(this.state.isDarkMode));
   }
-
   private loadSavedTheme() {
     const savedTheme = localStorage.getItem('darkMode');
     if (savedTheme) {
       this.updateState({ isDarkMode: savedTheme === 'true' });
     }
   }
-
-
-
 
 
 
