@@ -64,34 +64,36 @@ export class AppComponent implements OnInit {
     // Add more videos with their titles...
   ];
     isPlaying: boolean = false;
-initPlayer() {
-  const iframe = document.getElementById('youtube-player');
-  if (!iframe) {
-    setTimeout(() => this.initPlayer(), 100);
-    return;
-  }
+ initPlayer() {
+    const iframe = document.getElementById('youtube-player');
+    if (!iframe) {
+      setTimeout(() => this.initPlayer(), 100);
+      return;
+    }
 
-  this.player = new window.YT.Player('youtube-player', {
-    events: {
-      'onReady': () => {
-        // Initial state check
-        if (this.player?.getPlayerState) {
-          const state = this.player.getPlayerState();
+    this.player = new window.YT.Player('youtube-player', {
+      events: {
+        'onReady': () => {
+          if (this.player?.getPlayerState) {
+            const state = this.player.getPlayerState();
+            this.ngZone.run(() => {
+              this.isPlaying = state === window.YT.PlayerState.PLAYING;
+              // Autoplay when player is ready
+              this.player.playVideo();
+              this.isPlaying = true;
+              this.cdr.detectChanges();
+            });
+          }
+        },
+        'onStateChange': (event: any) => {
           this.ngZone.run(() => {
-            this.isPlaying = state === window.YT.PlayerState.PLAYING;
+            this.onPlayerStateChange(event);
             this.cdr.detectChanges();
           });
         }
-      },
-      'onStateChange': (event: any) => {
-        this.ngZone.run(() => {
-          this.onPlayerStateChange(event);
-          this.cdr.detectChanges();
-        });
       }
-    }
-  });
-}
+    });
+  }
 
 
 
@@ -202,26 +204,29 @@ playNext() {
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {this.updateSafeVideoUrl();
-  // Check if YT API is already loaded
-  if (!window.YT) {
-    const tag = document.createElement('script');
-    tag.src = 'https://www.youtube.com/iframe_api';
-    const firstScriptTag = document.getElementsByTagName('script')[0];
-    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-  }
+        this.initYouTubeAPI();
 
-  // Initialize player when API is ready
-  window.onYouTubeIframeAPIReady = () => {
-    this.ngZone.run(() => {
+
+  }
+   private initYouTubeAPI() {
+    if (!window.YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      const firstScriptTag = document.getElementsByTagName('script')[0];
+      firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+    }
+
+    window.onYouTubeIframeAPIReady = () => {
+      this.ngZone.run(() => {
+        this.initPlayer();
+      });
+    };
+
+    if (window.YT && window.YT.Player) {
       this.initPlayer();
-    });
-  };
+    }
+  }
 
-  // If API is already loaded, initialize player directly
-  if (window.YT && window.YT.Player) {
-    this.initPlayer();
-  }
-  }
 // Add this method to periodically check player state
 private startStateTracking() {
   setInterval(() => {
@@ -254,11 +259,12 @@ extractVideoId(url: string): string {
   return (match && match[2].length === 11) ? match[2] : '';
 }
 // Update ngOnInit to start state tracking
-ngOnInit() {
-  this.loadSavedTheme();
-  this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoUrl);
-  this.startStateTracking();
-}
+ ngOnInit() {
+    this.loadSavedTheme();
+    this.updateSafeVideoUrl();
+    this.startStateTracking();
+  }
+
   updateState(newState: Partial<AppState>) {
     this.state = { ...this.state, ...newState };
     this.cdr.markForCheck();
