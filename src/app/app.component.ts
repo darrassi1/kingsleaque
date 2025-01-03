@@ -76,9 +76,7 @@ toggleMenu() {
 
   ngOnInit() {
     this.loadSavedTheme();
-    this.initCanvas();
-    this.setupResizeHandler();
-    this.startAnimation();
+
 
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoUrl);
   }
@@ -141,77 +139,15 @@ toggleMenu() {
     }
   }
 
-  private initCanvas() {
-    const ctx = this.canvas.nativeElement.getContext('2d');
-    if (!ctx) throw new Error('Failed to get canvas context');
-    this.ctx = ctx;
-    this.setCanvasDimensions();
-    this.initializeElements();
-  }
 
-  private setCanvasDimensions() {
-    const dpr = window.devicePixelRatio || 1;
-    const rect = this.canvas.nativeElement.getBoundingClientRect();
-    this.canvas.nativeElement.width = rect.width * dpr;
-    this.canvas.nativeElement.height = rect.height * dpr;
-    this.ctx.scale(dpr, dpr);
-  }
 
-  private setupResizeHandler() {
-    fromEvent(window, 'resize')
-      .pipe(debounceTime(200))
-      .subscribe(() => {
-        this.setCanvasDimensions();
-        this.resetCanvas();
-      });
-  }
 
-  private initializeElements() {
-    this.animationElements = [];
-    const count = this.state.isDarkMode ? 200 : 20;
-    for (let i = 0; i < count; i++) {
-      this.animationElements.push({
-        x: Math.random() * this.canvas.nativeElement.width,
-        y: Math.random() * this.canvas.nativeElement.height,
-        type: 'star',
-        scale: Math.random() * 2 + 0.5,
-        opacity: Math.random(),
-        velocity: { x: Math.random() - 0.5, y: Math.random() - 0.5 },
-      });
-    }
-  }
 
-  private startAnimation() {
-    this.ngZone.runOutsideAngular(() => {
-      const animate = (currentTime: number) => {
-        requestAnimationFrame(animate);
-        const delta = currentTime - this.lastTime;
-        if (delta < this.frameTime) return;
-        this.lastTime = currentTime;
-        this.updateAndDraw();
-      };
-      requestAnimationFrame(animate);
-    });
-  }
 
-  private updateAndDraw() {
-    this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
-    this.animationElements.forEach((element) => {
-      element.x += element.velocity!.x;
-      element.y += element.velocity!.y;
-      if (element.x < 0) element.x = this.canvas.nativeElement.width;
-      if (element.x > this.canvas.nativeElement.width) element.x = 0;
-      if (element.y < 0) element.y = this.canvas.nativeElement.height;
-      if (element.y > this.canvas.nativeElement.height) element.y = 0;
 
-      this.ctx.fillStyle = `rgba(255, 255, 255, ${element.opacity})`;
-      this.ctx.beginPath();
-      this.ctx.arc(element.x, element.y, element.scale!, 0, Math.PI * 2);
-      this.ctx.fill();
-    });
-  }
 
-  private resetCanvas() {
-    this.initializeElements();
-  }
+
+
+
+
 }
