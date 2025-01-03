@@ -28,9 +28,19 @@
   <main class="main-content">
     <div class="content-container" *ngIf="state.showContent">
       <div class="video-section">
-        <div class="video-container">
-          <iframe [src]="safeVideoUrl" frameborder="0" allowfullscreen></iframe>
-        </div>
+<div class="tv-frame-container">
+  <!-- TV Frame Background -->
+  <img
+    [src]="state.isDarkMode ? 'assets/tv-black.png' : 'assets/tv.png'"
+    class="tv-frame"
+    alt="TV Frame"
+  >
+
+  <!-- Video Container -->
+  <div class="video-container">
+    <iframe [src]="safeVideoUrl" frameborder="0" allowfullscreen></iframe>
+  </div>
+</div>
 
         <button
           class="donate-btn"

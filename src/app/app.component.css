@@ -11,7 +11,17 @@
 .menu-toggle {
   display: none; /* Hide toggle button on larger screens */
 }
-
+.tv-frame-container {
+  position: relative;
+  width: 100%;
+  max-width: 1200px; /* Adjust based on your needs */
+  margin: 0 auto;
+}
+.tv-frame {
+  width: 100%;
+  height: auto;
+  display: block;
+}
 body {
   font-family: Arial, sans-serif;
 }
@@ -268,22 +278,24 @@ html, body {
 
 /* Video Container Styling */
 .video-container {
-  position: relative;
+  position: absolute;
+  top: 43.92%;
+  left: 50.2%;
+  transform: translate(-50%, -50%); /* Centers the container perfectly */
+  width: 95%; /* Slightly less than frame width to account for borders */
+  height: 92%; /* Adjust based on TV frame's visible area */
+  overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
-  width: 100%;
-  height: 500px;
-  margin: 0 auto;
-  overflow: hidden;
-  border-radius: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-iframe {
-  width: 80%;
-  height: 100%;
+.video-container iframe {
+  width: 75.02%;
+  height: 77%;
+  object-fit: contain; /* Changed to contain to prevent stretching */
   border: none;
+  background-color: transparent; /* Ensures no background shows */
 }
 
 /* Login Form Styles */
