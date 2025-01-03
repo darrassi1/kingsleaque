@@ -200,29 +200,31 @@ html, body {
 .logo {
   width: 2.8rem;
   height: 2.8rem;
-  animation: spin 10s linear infinite, swing 2s ease-in-out infinite;
+  animation: spin 20s linear infinite, swing 10s ease-in-out infinite;
   border-radius: 10px;
 }
+
 @keyframes spin {
   from {
     transform: rotate(0deg);
   }
   to {
-    transform: rotate(360deg);
+    transform: rotate(180deg);
   }
 }
+
 @keyframes swing {
   0% {
     transform: rotate(0deg);
   }
   25% {
-    transform: rotate(10deg);
+    transform: rotate(25deg);
   }
   50% {
     transform: rotate(0deg);
   }
   75% {
-    transform: rotate(-10deg);
+    transform: rotate(-25deg);
   }
   100% {
     transform: rotate(0deg);
