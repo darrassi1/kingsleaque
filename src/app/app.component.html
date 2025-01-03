@@ -80,14 +80,13 @@
   </div>
 </div>
 </div>
-        <button
-          class="donate-btn"
-          (click)="handleDonation()"
-          [disabled]="state.isLoading"
-        >
-          <i class="fas fa-coffee"></i>
-          {{ state.isLoading ? 'Processing...' : 'Buy Me a Coffee' }}
-        </button>
+<button
+  class="donate-btn"
+  (click)="handleDonation()"
+>
+  <i class="fas fa-coffee"></i>
+  Buy Me a Coffee
+</button>
 
         <!-- Admin Controls -->
         <div *ngIf="state.isLoggedIn" class="admin-controls">

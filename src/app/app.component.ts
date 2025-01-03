@@ -1,6 +1,6 @@
 import {Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone, HostListener} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { loadStripe } from '@stripe/stripe-js';
+
 
 declare global {
   interface Window {
@@ -146,7 +146,6 @@ playNext() {
       }
     }
   }
-  private stripe = loadStripe('your-stripe-publishable-key-here');
   state: AppState = {
     isDarkMode: false,
     isLoggedIn: false,
@@ -219,27 +218,11 @@ extractVideoId(url: string): string {
       }
     }, 1000);
   }
-  async handleDonation() {
-    this.updateState({ isLoading: true });
-    try {
-      const stripe = await this.stripe;
-      if (!stripe) throw new Error('Stripe failed to load');
 
-      const { error } = await stripe.redirectToCheckout({
-        lineItems: [{ price: 'price_id', quantity: 1 }],
-        mode: 'payment',
-        successUrl: `${window.location.origin}/success`,
-        cancelUrl: `${window.location.origin}/cancel`,
-      });
-
-      if (error) throw error;
-    } catch (err) {
-      this.updateState({
-        errorMessage: 'Payment failed',
-        isLoading: false,
-      });
-    }
-  }
+handleDonation() {
+  // Open Buy Me a Coffee in a new tab
+  window.open('https://buymeacoffee.com/darrassi1', '_blank');
+}
   toggleDarkMode() {
     this.updateState({ isDarkMode: !this.state.isDarkMode });
     localStorage.setItem('darkMode', String(this.state.isDarkMode));
