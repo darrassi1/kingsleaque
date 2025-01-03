@@ -112,35 +112,48 @@ onPlayerStateChange(event: any) {
   }
   this.cdr.detectChanges();
 }
-  togglePlayButton() {
-  const currentVideo = this.videosUrl.find(video => video.url === this.videoUrl);
-  // @ts-ignore
-    const currentIndex = this.videosUrl.indexOf(currentVideo);
-  if (currentVideo) {
-    this.togglePlay(currentVideo, currentIndex, new Event('click'));
+togglePlayButton() {
+  if (!this.player) {
+    this.initPlayer();
+    return;
   }
-}
-  togglePlay(video: VideoItem, index: number, event: Event) {
-    event.stopPropagation();
 
-    if (video.url === this.videoUrl) {
-      // Toggle play/pause for current video
-      if (this.player && this.player.getPlayerState) {
-        const playerState = this.player.getPlayerState();
-        if (playerState === window.YT.PlayerState.PLAYING) {
-          this.player.pauseVideo();
-          this.isPlaying = false;
-        } else {
-          this.player.playVideo();
-          this.isPlaying = true;
-        }
+  const currentVideo = this.videosUrl[this.currentIndex]; // Use currentIndex instead of find
+  this.togglePlay(currentVideo, this.currentIndex, new Event('click'));
+}
+
+togglePlay(video: VideoItem, index: number, event: Event) {
+  event.stopPropagation();
+
+  // Initialize player if it doesn't exist
+  if (!this.player) {
+    this.initPlayer();
+    return;
+  }
+
+  if (video.url === this.videoUrl) {
+    // Toggle play/pause for current video
+    if (this.player.getPlayerState) {
+      const playerState = this.player.getPlayerState();
+      if (playerState === window.YT.PlayerState.PLAYING) {
+        this.player.pauseVideo();
+        this.isPlaying = false;
+      } else {
+        this.player.playVideo();
+        this.isPlaying = true;
       }
     } else {
-      // Select and play new video
-      this.selectVideo(video, index);
+      // If player state isn't available yet, try to play
+      this.player.playVideo();
       this.isPlaying = true;
     }
+  } else {
+    // Select and play new video
+    this.selectVideo(video, index);
+    this.isPlaying = true;
   }
+  this.cdr.detectChanges();
+}
 
 toggleMenu() {
   this.menuVisible = !this.menuVisible;
