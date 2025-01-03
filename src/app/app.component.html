@@ -35,8 +35,50 @@
   >
   <!-- Video Container -->
   <div class="video-container">
-    <iframe [src]="safeVideoUrl" frameborder="0" allowfullscreen></iframe>
+      <iframe
+    id="youtube-player"
+    [src]="safeVideoUrl"
+    frameborder="0"
+    allowfullscreen
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+  ></iframe>
   </div>
+</div>
+        <!-- Add the new playlist controls and list -->
+<!-- In app.component.html -->
+<div class="playlist-section">
+  <div class="playlist-controls">
+    <button (click)="playPrevious()" class="control-btn" title="Previous">
+      <i class="fas fa-step-backward"></i>
+    </button>
+    <button (click)="togglePlayButton()" class="control-btn" title="Play/Pause">
+      <i class="fas" [class.fa-play]="!isPlaying" [class.fa-pause]="isPlaying"></i>
+    </button>
+    <button (click)="playNext()" class="control-btn" title="Next">
+      <i class="fas fa-step-forward"></i>
+    </button>
+  </div>
+
+  <div class="playlist">
+  <div
+    *ngFor="let video of videosUrl; let i = index"
+    [class.active]="video.url === videoUrl"
+    (click)="selectVideo(video, i)"
+    class="playlist-item"
+  >
+    <div class="playlist-item-content">
+      <span class="playlist-index">{{ i + 1 }}</span>
+      <span class="playlist-title">{{ video.title }}</span>
+      <span
+        class="playing-indicator"
+        (click)="togglePlay(video, i, $event)"
+        *ngIf="video.url === videoUrl"
+      >
+        <i class="fas" [class.fa-play]="!isPlaying" [class.fa-pause]="isPlaying"></i>
+      </span>
+    </div>
+  </div>
+</div>
 </div>
         <button
           class="donate-btn"

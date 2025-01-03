@@ -1,15 +1,16 @@
-import { Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone } from '@angular/core';
+import {Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone, HostListener} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { loadStripe } from '@stripe/stripe-js';
 
-interface AnimationElement {
-  x: number;
-  y: number;
-  type: string;
-  scale?: number;
-  rotation?: number;
-  opacity?: number;
-  velocity?: { x: number; y: number };
+declare global {
+  interface Window {
+    YT: any;
+    onYouTubeIframeAPIReady: any;
+  }
+}
+interface VideoItem {
+  url: string;
+  title: string;
 }
 interface AppState {
   isDarkMode: boolean;
@@ -26,16 +27,125 @@ interface AppState {
 })
 export class AppComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
+  player: any;
+  currentIndex: number = 0;
   safeVideoUrl!: SafeResourceUrl;
   videoUrl: string = 'https://www.youtube.com/embed/J1tTti-xMgs';
-menuVisible = false;
+  menuVisible = false;
+  videosUrl: VideoItem[] = [
+    {
+      url: 'https://www.youtube.com/embed/bNyUyrR0PHo',
+      title: 'Aljazeera'
+    },
+    {
+      url: 'https://www.youtube.com/embed/J1tTti-xMgs',
+      title: 'koora'
+    },
+        {
+      url: 'https://www.youtube.com/embed/jJqcFN-hjGg',
+      title: 'AlArabiya'
+    },
+            {
+      url: 'https://www.youtube.com/embed/e2RgSa1Wt5o',
+      title: 'Alaraby TV'
+    },
+                {
+      url: 'https://www.youtube.com/embed/OLWU0rKOQ6o',
+      title: 'Surya TV'
+    },
+                    {
+      url: 'https://www.youtube.com/embed/et0bSUddkn4',
+      title: 'AlHadath'
+    },
+                        {
+      url: 'https://www.youtube.com/embed/f6VpkfV7m4Y',
+      title: 'Asharq News'
+    },
+    // Add more videos with their titles...
+  ];
+    isPlaying: boolean = false;
+  initPlayer() {
+    this.player = new window.YT.Player('youtube-player', {
+      events: {
+        'onStateChange': this.onPlayerStateChange.bind(this)
+      }
+    });
+  }
+
+  onPlayerStateChange(event: any) {
+    this.isPlaying = event.data === window.YT.PlayerState.PLAYING;
+  }
+  togglePlayButton() {
+  const currentVideo = this.videosUrl.find(video => video.url === this.videoUrl);
+  // @ts-ignore
+    const currentIndex = this.videosUrl.indexOf(currentVideo);
+  if (currentVideo) {
+    this.togglePlay(currentVideo, currentIndex, new Event('click'));
+  }
+}
+  togglePlay(video: VideoItem, index: number, event: Event) {
+    event.stopPropagation();
+
+    if (video.url === this.videoUrl) {
+      // Toggle play/pause for current video
+      if (this.player && this.player.getPlayerState) {
+        const playerState = this.player.getPlayerState();
+        if (playerState === window.YT.PlayerState.PLAYING) {
+          this.player.pauseVideo();
+          this.isPlaying = false;
+        } else {
+          this.player.playVideo();
+          this.isPlaying = true;
+        }
+      }
+    } else {
+      // Select and play new video
+      this.selectVideo(video, index);
+      this.isPlaying = true;
+    }
+  }
+
 toggleMenu() {
   this.menuVisible = !this.menuVisible;
 }
-  private ctx!: CanvasRenderingContext2D;
-  private animationElements: AnimationElement[] = [];
-  private lastTime = 0;
-  private readonly frameTime = 1000 / 60; // 60 FPS
+selectVideo(video: VideoItem, index: number) {
+  this.videoUrl = video.url;
+  this.currentIndex = index;
+  this.updateVideoUrl();
+}
+
+playNext() {
+  if (this.currentIndex < this.videosUrl.length - 1) {
+    this.currentIndex++;
+  } else {
+    this.currentIndex = 0; // Loop back to start
+  }
+  this.videoUrl = this.videosUrl[this.currentIndex].url;
+  this.updateVideoUrl();
+}
+
+  playPrevious() {
+  if (this.currentIndex > 0) {
+    this.currentIndex--;
+  } else {
+    this.currentIndex = this.videosUrl.length - 1; // Loop to end
+  }
+  this.videoUrl = this.videosUrl[this.currentIndex].url;
+  this.updateVideoUrl();
+}
+  @HostListener('window:keydown', ['$event'])
+  handleKeyboardEvent(event: KeyboardEvent) {
+    if (this.state.showContent) { // Only if video section is visible
+      switch(event.key) {
+        case 'ArrowRight':
+          this.playNext();
+          break;
+        case 'ArrowLeft':
+          this.playPrevious();
+          break;
+      }
+    }
+  }
   private stripe = loadStripe('your-stripe-publishable-key-here');
   state: AppState = {
     isDarkMode: false,
@@ -51,7 +161,19 @@ toggleMenu() {
     private sanitizer: DomSanitizer,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
-  ) {this.updateSafeVideoUrl();}
+  ) {this.updateSafeVideoUrl();
+      // Load YouTube API
+    const tag = document.createElement('script');
+    tag.src = 'https://www.youtube.com/iframe_api';
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+
+    // Initialize player when API is ready
+    window.onYouTubeIframeAPIReady = () => {
+      this.initPlayer();
+    };
+  }
+
     redirectToHome() {
     this.state.showContent = true;
     this.state.showLoginForm = false;
@@ -59,10 +181,18 @@ toggleMenu() {
   updateSafeVideoUrl() {
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoUrl);
   }
-  updateVideoUrl() {
-    this.updateSafeVideoUrl();
-    console.log('Video URL updated to:', this.videoUrl);
-  }
+updateVideoUrl() {
+  // Extract video ID from URL if it's a YouTube URL
+  const videoId = this.extractVideoId(this.videoUrl);
+  const embedUrl = `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
+  this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(embedUrl);
+}
+
+extractVideoId(url: string): string {
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+  const match = url.match(regExp);
+  return (match && match[2].length === 11) ? match[2] : '';
+}
   ngOnInit() {
     this.loadSavedTheme();
     this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoUrl);

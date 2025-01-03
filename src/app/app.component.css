@@ -10,6 +10,137 @@
 .menu-toggle {
   display: none; /* Hide toggle button on larger screens */
 }
+
+.playing-indicator {
+  margin-left: auto;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+}
+
+.playing-indicator:hover {
+  background: rgba(29, 185, 84, 0.2);
+}
+
+.playing-indicator i {
+  color: #1db954;
+}
+/* Add to your existing CSS */
+.playlist-section {
+  margin-top: 2rem;
+  background: rgba(40, 40, 40, 0.9);
+  border-radius: 8px;
+  padding: 1rem;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.playlist-controls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.control-btn {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 50%;
+  background: #1db954;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  transition: all 0.3s ease;
+}
+
+.control-btn:hover {
+  background: #1ed760;
+  transform: scale(1.1);
+}
+
+.playlist {
+  max-height: 300px;
+  overflow-y: auto;
+  border-radius: 4px;
+}
+
+.playlist-item {
+  padding: 0.75rem;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  color: white;
+}
+
+.playlist-item:hover {
+  background: rgba(62, 62, 62, 0.8);
+}
+
+.playlist-item.active {
+  background: rgba(29, 185, 84, 0.3);
+  border-left: 4px solid #1db954;
+}
+
+.playlist-item-content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.playlist-index {
+  width: 24px;
+  text-align: center;
+  opacity: 0.7;
+}
+
+.playlist-title {
+  flex-grow: 1;
+}
+
+.playing-indicator {
+  color: #1db954;
+}
+
+/* Dark mode adjustments */
+.dark .playlist-section {
+  background: rgba(20, 20, 20, 0.9);
+}
+
+.dark .playlist-item:hover {
+  background: rgba(40, 40, 40, 0.8);
+}
+
+/* Scrollbar styling */
+.playlist::-webkit-scrollbar {
+  width: 6px;
+}
+
+.playlist::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.playlist::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.playlist::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+
+
+
 .tv-frame-container {
   position: relative;
   width: 100%;
