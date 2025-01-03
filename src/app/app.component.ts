@@ -64,17 +64,52 @@ export class AppComponent implements OnInit {
     // Add more videos with their titles...
   ];
     isPlaying: boolean = false;
-  initPlayer() {
-    this.player = new window.YT.Player('youtube-player', {
-      events: {
-        'onStateChange': this.onPlayerStateChange.bind(this)
-      }
-    });
+initPlayer() {
+  const iframe = document.getElementById('youtube-player');
+  if (!iframe) {
+    setTimeout(() => this.initPlayer(), 100);
+    return;
   }
 
-  onPlayerStateChange(event: any) {
-    this.isPlaying = event.data === window.YT.PlayerState.PLAYING;
+  this.player = new window.YT.Player('youtube-player', {
+    events: {
+      'onReady': () => {
+        // Initial state check
+        if (this.player?.getPlayerState) {
+          const state = this.player.getPlayerState();
+          this.ngZone.run(() => {
+            this.isPlaying = state === window.YT.PlayerState.PLAYING;
+            this.cdr.detectChanges();
+          });
+        }
+      },
+      'onStateChange': (event: any) => {
+        this.ngZone.run(() => {
+          this.onPlayerStateChange(event);
+          this.cdr.detectChanges();
+        });
+      }
+    }
+  });
+}
+
+
+
+onPlayerStateChange(event: any) {
+  // Handle all possible player states
+  switch (event.data) {
+    case window.YT.PlayerState.PLAYING:
+      this.isPlaying = true;
+      break;
+    case window.YT.PlayerState.PAUSED:
+    case window.YT.PlayerState.ENDED:
+    case window.YT.PlayerState.BUFFERING:
+    case window.YT.PlayerState.UNSTARTED:
+      this.isPlaying = false;
+      break;
   }
+  this.cdr.detectChanges();
+}
   togglePlayButton() {
   const currentVideo = this.videosUrl.find(video => video.url === this.videoUrl);
   // @ts-ignore
@@ -112,6 +147,12 @@ selectVideo(video: VideoItem, index: number) {
   this.videoUrl = video.url;
   this.currentIndex = index;
   this.updateVideoUrl();
+
+  // If player exists, load the video directly
+  if (this.player?.loadVideoById) {
+    const videoId = this.extractVideoId(video.url);
+    this.player.loadVideoById(videoId);
+  }
 }
 
 playNext() {
@@ -161,18 +202,38 @@ playNext() {
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef
   ) {this.updateSafeVideoUrl();
-      // Load YouTube API
+  // Check if YT API is already loaded
+  if (!window.YT) {
     const tag = document.createElement('script');
     tag.src = 'https://www.youtube.com/iframe_api';
     const firstScriptTag = document.getElementsByTagName('script')[0];
     firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
-
-    // Initialize player when API is ready
-    window.onYouTubeIframeAPIReady = () => {
-      this.initPlayer();
-    };
   }
 
+  // Initialize player when API is ready
+  window.onYouTubeIframeAPIReady = () => {
+    this.ngZone.run(() => {
+      this.initPlayer();
+    });
+  };
+
+  // If API is already loaded, initialize player directly
+  if (window.YT && window.YT.Player) {
+    this.initPlayer();
+  }
+  }
+// Add this method to periodically check player state
+private startStateTracking() {
+  setInterval(() => {
+    if (this.player?.getPlayerState) {
+      this.ngZone.run(() => {
+        const state = this.player.getPlayerState();
+        this.isPlaying = state === window.YT.PlayerState.PLAYING;
+        this.cdr.detectChanges();
+      });
+    }
+  }, 500); // Check every 500ms
+}
     redirectToHome() {
     this.state.showContent = true;
     this.state.showLoginForm = false;
@@ -192,10 +253,12 @@ extractVideoId(url: string): string {
   const match = url.match(regExp);
   return (match && match[2].length === 11) ? match[2] : '';
 }
-  ngOnInit() {
-    this.loadSavedTheme();
-    this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoUrl);
-  }
+// Update ngOnInit to start state tracking
+ngOnInit() {
+  this.loadSavedTheme();
+  this.safeVideoUrl = this.sanitizer.bypassSecurityTrustResourceUrl(this.videoUrl);
+  this.startStateTracking();
+}
   updateState(newState: Partial<AppState>) {
     this.state = { ...this.state, ...newState };
     this.cdr.markForCheck();
