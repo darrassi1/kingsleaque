@@ -30,7 +30,7 @@ export class AppComponent implements OnInit {
   player: any;
   currentIndex: number = 0;
   safeVideoUrl!: SafeResourceUrl;
-  videoUrl: string = 'https://www.youtube.com/embed/J1tTti-xMgs';
+  videoUrl: string = 'https://www.youtube.com/embed/JKzuzoQnV-8';
   menuVisible = false;
   videosUrl: VideoItem[] = [
     {
@@ -38,8 +38,8 @@ export class AppComponent implements OnInit {
       title: 'Aljazeera'
     },
     {
-      url: 'https://www.youtube.com/embed/J1tTti-xMgs',
-      title: 'koora'
+      url: 'https://www.youtube.com/embed/JKzuzoQnV-8',
+      title: '👑 KINGS YCN-R2D2 ⚽'
     },
         {
       url: 'https://www.youtube.com/embed/jJqcFN-hjGg',
