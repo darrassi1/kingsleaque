@@ -1,10 +1,6 @@
 import {Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone, HostListener} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-interface PiPWindow extends Window {
-  pictureInPictureEnabled?: boolean;
-}
 
-declare var window: PiPWindow;
 
 declare global {
   interface Window {
@@ -32,8 +28,6 @@ interface AppState {
 export class AppComponent implements OnInit {
   @ViewChild('canvas', { static: true }) canvas!: ElementRef<HTMLCanvasElement>;
   player: any;
-  isPiPSupported: boolean = false;
-isInPiPMode: boolean = false;
   currentIndex: number = 0;
   safeVideoUrl!: SafeResourceUrl;
   videoUrl: string = 'https://www.youtube.com/embed/JKzuzoQnV-8';
@@ -71,35 +65,39 @@ isInPiPMode: boolean = false;
   ];
     isPlaying: boolean = false;
  initPlayer() {
-    const iframe = document.getElementById('youtube-player');
-    if (!iframe) {
-      setTimeout(() => this.initPlayer(), 100);
-      return;
-    }
+  const iframe = document.getElementById('youtube-player');
+  if (!iframe) {
+    setTimeout(() => this.initPlayer(), 100);
+    return;
+  }
 
-    this.player = new window.YT.Player('youtube-player', {
-      events: {
-        'onReady': () => {
-          if (this.player?.getPlayerState) {
-            const state = this.player.getPlayerState();
-            this.ngZone.run(() => {
-              this.isPlaying = state === window.YT.PlayerState.PLAYING;
-              // Autoplay when player is ready
-              this.player.playVideo();
-              this.isPlaying = true;
-              this.cdr.detectChanges();
-            });
-          }
-        },
-        'onStateChange': (event: any) => {
+  this.player = new window.YT.Player('youtube-player', {
+    events: {
+      'onReady': () => {
+        if (this.player?.getPlayerState) {
+          const state = this.player.getPlayerState();
           this.ngZone.run(() => {
-            this.onPlayerStateChange(event);
+            this.isPlaying = state === window.YT.PlayerState.PLAYING;
+            this.player.playVideo();
+            this.isPlaying = true;
             this.cdr.detectChanges();
           });
         }
+      },
+      'onStateChange': (event: any) => {
+        this.ngZone.run(() => {
+          this.onPlayerStateChange(event);
+          this.cdr.detectChanges();
+        });
       }
-    });
-  }
+    },
+    playerVars: {
+      'enablejsapi': 1,
+      'pip': 1,
+      'playsinline': 1
+    }
+  });
+}
 
 
 
@@ -282,22 +280,6 @@ extractVideoId(url: string): string {
     this.loadSavedTheme();
     this.updateSafeVideoUrl();
     this.startStateTracking();
-      this.isPiPSupported = document.pictureInPictureEnabled;
-
-  // Add event listeners for PiP changes
-  document.addEventListener('enterpictureinpicture', () => {
-    this.ngZone.run(() => {
-      this.isInPiPMode = true;
-      this.cdr.detectChanges();
-    });
-  });
-
-  document.addEventListener('leavepictureinpicture', () => {
-    this.ngZone.run(() => {
-      this.isInPiPMode = false;
-      this.cdr.detectChanges();
-    });
-  });
   }
 
   updateState(newState: Partial<AppState>) {
@@ -331,76 +313,35 @@ handleDonation() {
     this.updateState({ isDarkMode: !this.state.isDarkMode });
     localStorage.setItem('darkMode', String(this.state.isDarkMode));
   }
-   async togglePictureInPicture() {
+async togglePictureInPicture() {
+  const iframe = document.querySelector('iframe');
+  if (!iframe) return;
+
   try {
-    // Check if PiP is supported
-    if (!document.pictureInPictureEnabled) {
-      alert('Picture-in-Picture is not supported in your browser');
-      return;
-    }
-
-    // Get the current video ID
-    const currentVideoId = this.extractVideoId(this.videoUrl);
-
-    // If already in PiP mode, exit
     if (document.pictureInPictureElement) {
       await document.exitPictureInPicture();
-      return;
-    }
-
-    // Create a video element
-    const video = document.createElement('video');
-    video.muted = false;
-    video.autoplay = true;
-    video.controls = true;
-
-    // Set up video source using a proxy or direct YouTube stream
-    // We'll use an invidious instance as a proxy to get the video stream
-    const proxyUrl = `https://inv.tux.pizza/latest_version?id=${currentVideoId}&itag=22`;
-
-    try {
-      const response = await fetch(proxyUrl);
-      if (!response.ok) throw new Error('Failed to get video stream');
-
-      const data = await response.json();
-      video.src = data.url;
-
-      // Add the video element to the DOM temporarily
-      video.style.display = 'none';
-      document.body.appendChild(video);
-
-      // Wait for the video to be loaded
-      await new Promise((resolve) => {
-        video.addEventListener('loadedmetadata', resolve);
-        video.addEventListener('error', () => {
-          alert('Failed to load video stream');
-          video.remove();
-        });
-      });
-
-      // Request Picture-in-Picture
-      await video.requestPictureInPicture();
-
-      // Sync the PiP video with the current YouTube player time
-      if (this.player?.getCurrentTime) {
-        const currentTime = await this.player.getCurrentTime();
-        video.currentTime = currentTime;
+    } else {
+      // Most reliable way to trigger PiP for YouTube embeds
+      if ('requestPictureInPicture' in HTMLVideoElement.prototype) {
+        // Find the video element inside the iframe
+        const video = iframe.contentDocument?.querySelector('video');
+        if (video) {
+          await video.requestPictureInPicture();
+        } else {
+          // Fallback to browser's auto-PiP trigger
+          await this.player.playVideo();
+          // Double click to trigger PiP
+          iframe.click();
+          iframe.click();
+        }
+      } else {
+        alert('Picture-in-Picture is not supported in your browser');
       }
-
-      // Clean up when PiP is closed
-      video.addEventListener('leavepictureinpicture', () => {
-        video.remove();
-      });
-
-    } catch (error) {
-      console.error('Error:', error);
-      video.remove();
-      alert('Failed to enter Picture-in-Picture mode. Please try again.');
     }
-
   } catch (error) {
     console.error('PiP error:', error);
-    alert('Failed to toggle Picture-in-Picture mode');
+    // Show user-friendly message about using browser's built-in PiP controls
+    alert('Please use your browser\'s built-in picture-in-picture controls or right-click the video and select "Picture in picture"');
   }
 }
   private loadSavedTheme() {
