@@ -1,7 +1,10 @@
 import {Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone, HostListener} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-
+interface HTMLVideoElementWithPip extends HTMLVideoElement {
+  webkitPresentationMode?: string;
+  webkitSetPresentationMode?: (mode: string) => void;
+}
 declare global {
   interface Window {
     YT: any;
@@ -313,35 +316,63 @@ handleDonation() {
     this.updateState({ isDarkMode: !this.state.isDarkMode });
     localStorage.setItem('darkMode', String(this.state.isDarkMode));
   }
-async togglePictureInPicture() {
-  const iframe = document.querySelector('iframe');
-  if (!iframe) return;
+// Add these to your app.component.ts
 
+
+
+async togglePictureInPicture() {
   try {
-    if (document.pictureInPictureElement) {
-      await document.exitPictureInPicture();
-    } else {
-      // Most reliable way to trigger PiP for YouTube embeds
-      if ('requestPictureInPicture' in HTMLVideoElement.prototype) {
-        // Find the video element inside the iframe
-        const video = iframe.contentDocument?.querySelector('video');
-        if (video) {
-          await video.requestPictureInPicture();
+    // Get the iframe
+    const iframe = document.getElementById('youtube-player') as HTMLIFrameElement;
+    if (!iframe) return;
+
+    // Create a button that will trigger PiP
+    const pipButton = document.createElement('button');
+    pipButton.innerHTML = 'Picture-in-Picture';
+    pipButton.style.position = 'absolute';
+    pipButton.style.zIndex = '10000';
+    pipButton.style.right = '10px';
+    pipButton.style.top = '10px';
+    pipButton.style.padding = '8px';
+    pipButton.style.backgroundColor = 'rgba(0,0,0,0.7)';
+    pipButton.style.color = 'white';
+    pipButton.style.border = 'none';
+    pipButton.style.borderRadius = '4px';
+    pipButton.style.cursor = 'pointer';
+
+    // Add button to video container
+    const videoContainer = document.querySelector('.video-container');
+    if (videoContainer) {
+      videoContainer.appendChild(pipButton);
+
+      // Add click handler
+      pipButton.onclick = () => {
+        // This is Chrome's gesture to activate PiP
+        if (document.pictureInPictureElement) {
+          document.exitPictureInPicture();
         } else {
-          // Fallback to browser's auto-PiP trigger
-          await this.player.playVideo();
-          // Double click to trigger PiP
-          iframe.click();
-          iframe.click();
+          const video = document.querySelector('video') as HTMLVideoElementWithPip;
+          if (video) {
+            if (video.webkitSetPresentationMode) {
+              // For Safari
+              video.webkitSetPresentationMode('picture-in-picture');
+            } else {
+              // For Chrome
+              video.requestPictureInPicture();
+            }
+          }
         }
-      } else {
-        alert('Picture-in-Picture is not supported in your browser');
-      }
+      };
+
+      // Remove button after 100ms (enough time for user to click)
+      setTimeout(() => {
+        pipButton.remove();
+      }, 100);
     }
+
   } catch (error) {
     console.error('PiP error:', error);
-    // Show user-friendly message about using browser's built-in PiP controls
-    alert('Please use your browser\'s built-in picture-in-picture controls or right-click the video and select "Picture in picture"');
+    alert('To use Picture-in-Picture: Right-click on the video and select "Picture-in-Picture"');
   }
 }
   private loadSavedTheme() {
