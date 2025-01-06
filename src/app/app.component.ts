@@ -1,10 +1,7 @@
 import {Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone, HostListener} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 
-interface HTMLVideoElementWithPip extends HTMLVideoElement {
-  webkitPresentationMode?: string;
-  webkitSetPresentationMode?: (mode: string) => void;
-}
+
 declare global {
   interface Window {
     YT: any;
@@ -67,7 +64,7 @@ export class AppComponent implements OnInit {
     // Add more videos with their titles...
   ];
     isPlaying: boolean = false;
- initPlayer() {
+initPlayer() {
   const iframe = document.getElementById('youtube-player');
   if (!iframe) {
     setTimeout(() => this.initPlayer(), 100);
@@ -81,8 +78,6 @@ export class AppComponent implements OnInit {
           const state = this.player.getPlayerState();
           this.ngZone.run(() => {
             this.isPlaying = state === window.YT.PlayerState.PLAYING;
-            this.player.playVideo();
-            this.isPlaying = true;
             this.cdr.detectChanges();
           });
         }
@@ -96,8 +91,9 @@ export class AppComponent implements OnInit {
     },
     playerVars: {
       'enablejsapi': 1,
-      'pip': 1,
-      'playsinline': 1
+      'playsinline': 1,
+      'allow': 'picture-in-picture; autoplay',
+      'fs': 1
     }
   });
 }
@@ -283,6 +279,19 @@ extractVideoId(url: string): string {
     this.loadSavedTheme();
     this.updateSafeVideoUrl();
     this.startStateTracking();
+      document.addEventListener('enterpictureinpicture', () => {
+    this.ngZone.run(() => {
+      console.log('Entered PiP mode');
+      this.cdr.detectChanges();
+    });
+  });
+
+  document.addEventListener('leavepictureinpicture', () => {
+    this.ngZone.run(() => {
+      console.log('Left PiP mode');
+      this.cdr.detectChanges();
+    });
+  });
   }
 
   updateState(newState: Partial<AppState>) {
@@ -322,57 +331,90 @@ handleDonation() {
 
 async togglePictureInPicture() {
   try {
-    // Get the iframe
+    // If we're already in PiP mode, exit
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+      return;
+    }
+
+    // Get the video element from the YouTube iframe
     const iframe = document.getElementById('youtube-player') as HTMLIFrameElement;
     if (!iframe) return;
 
-    // Create a button that will trigger PiP
-    const pipButton = document.createElement('button');
-    pipButton.innerHTML = 'Picture-in-Picture';
-    pipButton.style.position = 'absolute';
-    pipButton.style.zIndex = '10000';
-    pipButton.style.right = '10px';
-    pipButton.style.top = '10px';
-    pipButton.style.padding = '8px';
-    pipButton.style.backgroundColor = 'rgba(0,0,0,0.7)';
-    pipButton.style.color = 'white';
-    pipButton.style.border = 'none';
-    pipButton.style.borderRadius = '4px';
-    pipButton.style.cursor = 'pointer';
+    // Force the video to play - this is required for PiP
+    await this.player.playVideo();
 
-    // Add button to video container
-    const videoContainer = document.querySelector('.video-container');
-    if (videoContainer) {
-      videoContainer.appendChild(pipButton);
+    // We need to wait a bit for the video to start playing
+    await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Add click handler
-      pipButton.onclick = () => {
-        // This is Chrome's gesture to activate PiP
-        if (document.pictureInPictureElement) {
-          document.exitPictureInPicture();
-        } else {
-          const video = document.querySelector('video') as HTMLVideoElementWithPip;
-          if (video) {
-            if (video.webkitSetPresentationMode) {
-              // For Safari
-              video.webkitSetPresentationMode('picture-in-picture');
-            } else {
-              // For Chrome
-              video.requestPictureInPicture();
-            }
-          }
-        }
-      };
+    // Create a temporary video element that mirrors the YouTube video
+    const video = document.createElement('video');
+    video.muted = true; // Must be muted initially due to autoplay policies
+    video.style.display = 'none';
+    video.playsInline = true;
+    video.autoplay = true;
 
-      // Remove button after 100ms (enough time for user to click)
-      setTimeout(() => {
-        pipButton.remove();
-      }, 100);
+    // Handle video stream from YouTube canvas
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+
+    // Set canvas size to match video
+    canvas.width = 640;  // Standard YouTube width
+    canvas.height = 360; // Standard YouTube height
+
+    // Create a media stream from the canvas
+    const stream = canvas.captureStream();
+    video.srcObject = stream;
+
+    // Add video to document temporarily
+    document.body.appendChild(video);
+
+    // Start playing the video
+    await video.play();
+
+    // Function to capture frames from YouTube
+    const captureFrame = () => {
+      if (!document.pictureInPictureElement) {
+        // If PiP is closed, clean up
+        video.remove();
+        return;
+      }
+
+      // Draw the YouTube iframe to canvas
+      if (ctx) {
+        // @ts-ignore
+        ctx.drawImage(iframe, 0, 0, canvas.width, canvas.height);
+      }
+
+      requestAnimationFrame(captureFrame);
+    };
+
+    try {
+      // Request Picture-in-Picture
+      await video.requestPictureInPicture();
+
+      // Start capturing frames
+      captureFrame();
+
+      // Sync audio with the main YouTube player
+      this.player.unMute();
+
+      // Listen for PiP window close
+      video.addEventListener('leavepictureinpicture', () => {
+        video.remove();
+        canvas.remove();
+      });
+
+    } catch (error) {
+      console.error('Failed to enter PiP mode:', error);
+      video.remove();
+      canvas.remove();
+      alert('Failed to enter Picture-in-Picture mode. Please use browser controls: right-click the video and select "Picture in Picture"');
     }
 
   } catch (error) {
     console.error('PiP error:', error);
-    alert('To use Picture-in-Picture: Right-click on the video and select "Picture-in-Picture"');
+    alert('To use Picture-in-Picture: Right-click on the video and select "Picture in Picture"');
   }
 }
   private loadSavedTheme() {
