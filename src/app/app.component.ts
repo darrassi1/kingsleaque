@@ -309,18 +309,31 @@ handleDonation() {
     this.updateState({ isDarkMode: !this.state.isDarkMode });
     localStorage.setItem('darkMode', String(this.state.isDarkMode));
   }
-    togglePictureInPicture() {
-  const iframe = document.getElementById('youtube-player') as HTMLIFrameElement;
-  if (iframe) {
-    // Check if the browser supports Picture-in-Picture for iframes
-    if ('requestPictureInPicture' in document) {
-      // Use the method on the iframe's contentWindow
-      iframe.contentWindow?.document.querySelector('video')?.requestPictureInPicture().catch(error => {
-        console.error('Failed to enter Picture-in-Picture mode:', error);
-      });
+   async togglePictureInPicture() {
+  try {
+    const iframe = document.querySelector('iframe');
+    if (!iframe) return;
+
+    // Create a video element
+    const video = document.createElement('video');
+    video.src = iframe.src;
+    video.setAttribute('allowfullscreen', 'true');  // Changed from allowFullscreen property
+
+    // Try to enter PiP mode
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
     } else {
-      console.error('Picture-in-Picture is not supported in this browser.');
+      await video.requestPictureInPicture();
     }
+
+    // Handle cleanup when PiP is closed
+    video.addEventListener('leavepictureinpicture', () => {
+      video.remove();
+    });
+
+  } catch (error) {
+    console.error('Failed to enter Picture-in-Picture mode:', error);
+    alert('Picture-in-Picture mode is not supported in your browser or with this video.');
   }
 }
   private loadSavedTheme() {
