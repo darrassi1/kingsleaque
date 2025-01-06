@@ -1,6 +1,6 @@
 import {Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone, HostListener} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-
+import { PipService } from './pip.service';
 
 declare global {
   interface Window {
@@ -64,39 +64,48 @@ export class AppComponent implements OnInit {
     // Add more videos with their titles...
   ];
     isPlaying: boolean = false;
-initPlayer() {
-  const iframe = document.getElementById('youtube-player');
-  if (!iframe) {
-    setTimeout(() => this.initPlayer(), 100);
-    return;
+      // Add these methods
+  togglePiP(): void {
+    if (this.pipService.isPipActive()) {
+      this.pipService.closePipWindow();
+    } else {
+      // Extract the current video URL and open in PiP
+      const currentVideo = this.videosUrl[this.currentIndex];
+      const videoId = this.extractVideoId(currentVideo.url);
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
+      this.pipService.openPipWindow(embedUrl);
+    }
   }
+ initPlayer() {
+    const iframe = document.getElementById('youtube-player');
+    if (!iframe) {
+      setTimeout(() => this.initPlayer(), 100);
+      return;
+    }
 
-  this.player = new window.YT.Player('youtube-player', {
-    events: {
-      'onReady': () => {
-        if (this.player?.getPlayerState) {
-          const state = this.player.getPlayerState();
+    this.player = new window.YT.Player('youtube-player', {
+      events: {
+        'onReady': () => {
+          if (this.player?.getPlayerState) {
+            const state = this.player.getPlayerState();
+            this.ngZone.run(() => {
+              this.isPlaying = state === window.YT.PlayerState.PLAYING;
+              // Autoplay when player is ready
+              this.player.playVideo();
+              this.isPlaying = true;
+              this.cdr.detectChanges();
+            });
+          }
+        },
+        'onStateChange': (event: any) => {
           this.ngZone.run(() => {
-            this.isPlaying = state === window.YT.PlayerState.PLAYING;
+            this.onPlayerStateChange(event);
             this.cdr.detectChanges();
           });
         }
-      },
-      'onStateChange': (event: any) => {
-        this.ngZone.run(() => {
-          this.onPlayerStateChange(event);
-          this.cdr.detectChanges();
-        });
       }
-    },
-    playerVars: {
-      'enablejsapi': 1,
-      'playsinline': 1,
-      'allow': 'picture-in-picture; autoplay',
-      'fs': 1
-    }
-  });
-}
+    });
+  }
 
 
 
@@ -173,25 +182,42 @@ selectVideo(video: VideoItem, index: number) {
   }
 }
 
-playNext() {
-  if (this.currentIndex < this.videosUrl.length - 1) {
-    this.currentIndex++;
-  } else {
-    this.currentIndex = 0; // Loop back to start
-  }
-  this.videoUrl = this.videosUrl[this.currentIndex].url;
-  this.updateVideoUrl();
-}
+  // Update your existing playNext and playPrevious methods to handle PiP
+  playNext(): void {
+    if (this.currentIndex < this.videosUrl.length - 1) {
+      this.currentIndex++;
+    } else {
+      this.currentIndex = 0;
+    }
+    this.videoUrl = this.videosUrl[this.currentIndex].url;
+    this.updateVideoUrl();
 
-  playPrevious() {
-  if (this.currentIndex > 0) {
-    this.currentIndex--;
-  } else {
-    this.currentIndex = this.videosUrl.length - 1; // Loop to end
+    // Update PiP window if active
+    if (this.pipService.isPipActive()) {
+      const videoId = this.extractVideoId(this.videoUrl);
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
+      this.pipService.closePipWindow();
+      this.pipService.openPipWindow(embedUrl);
+    }
   }
-  this.videoUrl = this.videosUrl[this.currentIndex].url;
-  this.updateVideoUrl();
-}
+
+  playPrevious(): void {
+    if (this.currentIndex > 0) {
+      this.currentIndex--;
+    } else {
+      this.currentIndex = this.videosUrl.length - 1;
+    }
+    this.videoUrl = this.videosUrl[this.currentIndex].url;
+    this.updateVideoUrl();
+
+    // Update PiP window if active
+    if (this.pipService.isPipActive()) {
+      const videoId = this.extractVideoId(this.videoUrl);
+      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
+      this.pipService.closePipWindow();
+      this.pipService.openPipWindow(embedUrl);
+    }
+  }
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if (this.state.showContent) { // Only if video section is visible
@@ -218,7 +244,8 @@ playNext() {
   constructor(
     private sanitizer: DomSanitizer,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+     public pipService: PipService  // Changed to public
   ) {this.updateSafeVideoUrl();
         this.initYouTubeAPI();
 
@@ -279,19 +306,6 @@ extractVideoId(url: string): string {
     this.loadSavedTheme();
     this.updateSafeVideoUrl();
     this.startStateTracking();
-      document.addEventListener('enterpictureinpicture', () => {
-    this.ngZone.run(() => {
-      console.log('Entered PiP mode');
-      this.cdr.detectChanges();
-    });
-  });
-
-  document.addEventListener('leavepictureinpicture', () => {
-    this.ngZone.run(() => {
-      console.log('Left PiP mode');
-      this.cdr.detectChanges();
-    });
-  });
   }
 
   updateState(newState: Partial<AppState>) {
@@ -325,102 +339,19 @@ handleDonation() {
     this.updateState({ isDarkMode: !this.state.isDarkMode });
     localStorage.setItem('darkMode', String(this.state.isDarkMode));
   }
-// Add these to your app.component.ts
-
-
-
-async togglePictureInPicture() {
-  try {
-    // If we're already in PiP mode, exit
-    if (document.pictureInPictureElement) {
-      await document.exitPictureInPicture();
-      return;
-    }
-
-    // Get the video element from the YouTube iframe
-    const iframe = document.getElementById('youtube-player') as HTMLIFrameElement;
-    if (!iframe) return;
-
-    // Force the video to play - this is required for PiP
-    await this.player.playVideo();
-
-    // We need to wait a bit for the video to start playing
-    await new Promise(resolve => setTimeout(resolve, 100));
-
-    // Create a temporary video element that mirrors the YouTube video
-    const video = document.createElement('video');
-    video.muted = true; // Must be muted initially due to autoplay policies
-    video.style.display = 'none';
-    video.playsInline = true;
-    video.autoplay = true;
-
-    // Handle video stream from YouTube canvas
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    // Set canvas size to match video
-    canvas.width = 640;  // Standard YouTube width
-    canvas.height = 360; // Standard YouTube height
-
-    // Create a media stream from the canvas
-    const stream = canvas.captureStream();
-    video.srcObject = stream;
-
-    // Add video to document temporarily
-    document.body.appendChild(video);
-
-    // Start playing the video
-    await video.play();
-
-    // Function to capture frames from YouTube
-    const captureFrame = () => {
-      if (!document.pictureInPictureElement) {
-        // If PiP is closed, clean up
-        video.remove();
-        return;
-      }
-
-      // Draw the YouTube iframe to canvas
-      if (ctx) {
-        // @ts-ignore
-        ctx.drawImage(iframe, 0, 0, canvas.width, canvas.height);
-      }
-
-      requestAnimationFrame(captureFrame);
-    };
-
-    try {
-      // Request Picture-in-Picture
-      await video.requestPictureInPicture();
-
-      // Start capturing frames
-      captureFrame();
-
-      // Sync audio with the main YouTube player
-      this.player.unMute();
-
-      // Listen for PiP window close
-      video.addEventListener('leavepictureinpicture', () => {
-        video.remove();
-        canvas.remove();
-      });
-
-    } catch (error) {
-      console.error('Failed to enter PiP mode:', error);
-      video.remove();
-      canvas.remove();
-      alert('Failed to enter Picture-in-Picture mode. Please use browser controls: right-click the video and select "Picture in Picture"');
-    }
-
-  } catch (error) {
-    console.error('PiP error:', error);
-    alert('To use Picture-in-Picture: Right-click on the video and select "Picture in Picture"');
-  }
-}
   private loadSavedTheme() {
     const savedTheme = localStorage.getItem('darkMode');
     if (savedTheme) {
       this.updateState({ isDarkMode: savedTheme === 'true' });
     }
   }
+
+
+
+
+
+
+
+
+
 }

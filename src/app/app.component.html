@@ -60,10 +60,9 @@
   </button>
   <!-- Picture-in-Picture Button -->
 
-<button (click)="togglePictureInPicture()" class="control-btn"
-        title="Picture in Picture (You can also right-click the video and select 'Picture in picture')">
-  <i class="fas fa-external-link-alt"></i>
-</button>
+  <button (click)="togglePiP()" class="control-btn" [class.active]="pipService.isPipActive()" title="Picture-in-Picture">
+    <i class="fas" [class.fa-compress]="pipService.isPipActive()" [class.fa-expand]="!pipService.isPipActive()"></i>
+  </button>
 </div>
 
   <div class="playlist">
