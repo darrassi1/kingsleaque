@@ -309,19 +309,24 @@ handleDonation() {
     this.updateState({ isDarkMode: !this.state.isDarkMode });
     localStorage.setItem('darkMode', String(this.state.isDarkMode));
   }
+    togglePictureInPicture() {
+  const iframe = document.getElementById('youtube-player') as HTMLIFrameElement;
+  if (iframe) {
+    // Check if the browser supports Picture-in-Picture for iframes
+    if ('requestPictureInPicture' in document) {
+      // Use the method on the iframe's contentWindow
+      iframe.contentWindow?.document.querySelector('video')?.requestPictureInPicture().catch(error => {
+        console.error('Failed to enter Picture-in-Picture mode:', error);
+      });
+    } else {
+      console.error('Picture-in-Picture is not supported in this browser.');
+    }
+  }
+}
   private loadSavedTheme() {
     const savedTheme = localStorage.getItem('darkMode');
     if (savedTheme) {
       this.updateState({ isDarkMode: savedTheme === 'true' });
     }
   }
-
-
-
-
-
-
-
-
-
 }
