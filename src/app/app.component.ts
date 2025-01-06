@@ -1,6 +1,6 @@
 import {Component, OnInit, ElementRef, ViewChild, ChangeDetectorRef, NgZone, HostListener} from '@angular/core';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { PipService } from './pip.service';
+
 
 declare global {
   interface Window {
@@ -64,18 +64,6 @@ export class AppComponent implements OnInit {
     // Add more videos with their titles...
   ];
     isPlaying: boolean = false;
-      // Add these methods
-  togglePiP(): void {
-    if (this.pipService.isPipActive()) {
-      this.pipService.closePipWindow();
-    } else {
-      // Extract the current video URL and open in PiP
-      const currentVideo = this.videosUrl[this.currentIndex];
-      const videoId = this.extractVideoId(currentVideo.url);
-      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
-      this.pipService.openPipWindow(embedUrl);
-    }
-  }
  initPlayer() {
     const iframe = document.getElementById('youtube-player');
     if (!iframe) {
@@ -182,42 +170,25 @@ selectVideo(video: VideoItem, index: number) {
   }
 }
 
-  // Update your existing playNext and playPrevious methods to handle PiP
-  playNext(): void {
-    if (this.currentIndex < this.videosUrl.length - 1) {
-      this.currentIndex++;
-    } else {
-      this.currentIndex = 0;
-    }
-    this.videoUrl = this.videosUrl[this.currentIndex].url;
-    this.updateVideoUrl();
-
-    // Update PiP window if active
-    if (this.pipService.isPipActive()) {
-      const videoId = this.extractVideoId(this.videoUrl);
-      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
-      this.pipService.closePipWindow();
-      this.pipService.openPipWindow(embedUrl);
-    }
+playNext() {
+  if (this.currentIndex < this.videosUrl.length - 1) {
+    this.currentIndex++;
+  } else {
+    this.currentIndex = 0; // Loop back to start
   }
+  this.videoUrl = this.videosUrl[this.currentIndex].url;
+  this.updateVideoUrl();
+}
 
-  playPrevious(): void {
-    if (this.currentIndex > 0) {
-      this.currentIndex--;
-    } else {
-      this.currentIndex = this.videosUrl.length - 1;
-    }
-    this.videoUrl = this.videosUrl[this.currentIndex].url;
-    this.updateVideoUrl();
-
-    // Update PiP window if active
-    if (this.pipService.isPipActive()) {
-      const videoId = this.extractVideoId(this.videoUrl);
-      const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&enablejsapi=1`;
-      this.pipService.closePipWindow();
-      this.pipService.openPipWindow(embedUrl);
-    }
+  playPrevious() {
+  if (this.currentIndex > 0) {
+    this.currentIndex--;
+  } else {
+    this.currentIndex = this.videosUrl.length - 1; // Loop to end
   }
+  this.videoUrl = this.videosUrl[this.currentIndex].url;
+  this.updateVideoUrl();
+}
   @HostListener('window:keydown', ['$event'])
   handleKeyboardEvent(event: KeyboardEvent) {
     if (this.state.showContent) { // Only if video section is visible
@@ -244,8 +215,7 @@ selectVideo(video: VideoItem, index: number) {
   constructor(
     private sanitizer: DomSanitizer,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef,
-     public pipService: PipService  // Changed to public
+    private cdr: ChangeDetectorRef
   ) {this.updateSafeVideoUrl();
         this.initYouTubeAPI();
 

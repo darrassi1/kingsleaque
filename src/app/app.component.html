@@ -47,23 +47,17 @@
         <!-- Add the new playlist controls and list -->
 <!-- In app.component.html -->
 <div class="playlist-section">
-  <!-- Playlist Controls -->
-<div class="playlist-controls">
-  <button (click)="playPrevious()" class="control-btn" title="Previous">
-    <i class="fas fa-step-backward"></i>
-  </button>
-  <button (click)="togglePlayButton()" class="control-btn" title="Play/Pause">
-    <i class="fas" [class.fa-play]="!isPlaying" [class.fa-pause]="isPlaying"></i>
-  </button>
-  <button (click)="playNext()" class="control-btn" title="Next">
-    <i class="fas fa-step-forward"></i>
-  </button>
-  <!-- Picture-in-Picture Button -->
-
-  <button (click)="togglePiP()" class="control-btn" [class.active]="pipService.isPipActive()" title="Picture-in-Picture">
-    <i class="fas" [class.fa-compress]="pipService.isPipActive()" [class.fa-expand]="!pipService.isPipActive()"></i>
-  </button>
-</div>
+  <div class="playlist-controls">
+    <button (click)="playPrevious()" class="control-btn" title="Previous">
+      <i class="fas fa-step-backward"></i>
+    </button>
+    <button (click)="togglePlayButton()" class="control-btn" title="Play/Pause">
+      <i class="fas" [class.fa-play]="!isPlaying" [class.fa-pause]="isPlaying"></i>
+    </button>
+    <button (click)="playNext()" class="control-btn" title="Next">
+      <i class="fas fa-step-forward"></i>
+    </button>
+  </div>
 
   <div class="playlist">
   <div
